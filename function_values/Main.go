@@ -4,5 +4,6 @@ func main() {
 	//mainCompute()
 	//mainAdder()
 	// mainCounter()
-	fibonacciMain()
+	// fibonacciMain()
+	mainLogger()
 }
