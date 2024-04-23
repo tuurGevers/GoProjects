@@ -15,6 +15,13 @@ type Event struct {
 	Timestamp int64
 }
 
+// String returns a string representation of the Event.
+// It formats the Event's type, message, and timestamp in a specific format.
+func (e Event) String() string {
+	t := time.Unix(0, e.Timestamp*int64(time.Millisecond)) // assuming Timestamp is in milliseconds
+	return fmt.Sprintf("Event [Type=%s, Message=%s, Time=%s]", e.Type, e.Message, t.Format("2006-01-02 15:04:05"))
+}
+
 // createEventLogger returns a closure that logs events and provides statistics.
 func createEventLogger(events *[]Event, categories map[string][]Event) func(eventType, message string) int {
 
@@ -75,6 +82,16 @@ func printReadableTime(ts int64) {
 	fmt.Println(t.UTC().Format("2006-01-02 15:04:05"))
 }
 
+func returnReadableTime(ts int64) string {
+	// Convert Unix millisecond timestamp to seconds and nanoseconds for Go's time package
+	t := time.Unix(ts/1000, (ts%1000)*1000000)
+	// Format time in a readable format
+	return t.UTC().Format("2006-01-02 15:04:05")
+}
+
+// mainLogger is a function that demonstrates the usage of an event logger and provides example statistics functions.
+// It initializes a slice to store events and a map to categorize events by type.
+// The function logs events of different types and prints statistics based on the logged events.
 func mainLogger() {
 	// TODO: Initialize a slice to store events.
 	events := make([]Event, 0)
@@ -98,4 +115,6 @@ func mainLogger() {
 	fmt.Println("Total 'error' events:", totalEventsByType("error", categories))
 
 	fmt.Println("Events after a certain timestamp:", numberOfEventsAfter(time.Now().UnixMilli()-2000, events))
+
+	fmt.Println(listEventsByType("error", categories))
 }
