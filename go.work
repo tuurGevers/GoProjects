@@ -5,3 +5,5 @@ use ./sqrt
 use ./PictureSlice
 
 use ./GoMaps
+
+use ./function_values
