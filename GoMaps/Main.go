@@ -7,6 +7,11 @@ type Vertex struct {
 }
 
 var m map[string]Vertex
+var TestMap = map[string]Vertex{
+	"TestEntry": {
+		500.0, 200.0,
+	},
+}
 
 func main() {
 	//basic map
@@ -31,6 +36,6 @@ func main() {
 
 	fmt.Println(mLiteral["Test"])
 
-	manipulationTest()
+	manipulationTest(TestMap)
 
 }

@@ -2,28 +2,29 @@ package main
 
 import "fmt"
 
-var TestMap = map[string]Vertex{
-	"TestEntry": {
-		500.0, 200.0,
-	},
-}
-
-func manipulationTest() {
+//try printing test entry 3 times
+func manipulationTest(testMap map[string]Vertex) {
+	//basic fetch will succeed
 	fmt.Println("map manipulation test")
-	printEntryIfExists()
+	printEntryIfExists(testMap, "TestEntry")
+
+	//entry is deleted so will print failed string
 	delete(TestMap, "TestEntry")
-	printEntryIfExists()
+	printEntryIfExists(testMap, "TestEntry")
+
+	//put new entry with different values will succeed
 	TestMap["TestEntry"] = Vertex{
 		200.0, 500.0,
 	}
-	printEntryIfExists()
+	printEntryIfExists(testMap, "TestEntry")
 
 }
 
-func printEntryIfExists() {
+//prints the value of key in testMap if it exists els print fail statement
+func printEntryIfExists(testMap map[string]Vertex, key string) {
 	if elem, ok := TestMap["TestEntry"]; ok {
-		fmt.Printf("TestEntry  %v %v \n", ok, elem)
+		fmt.Printf("%s: %v (Long: %0.1f - Lat: %0.1f) \n", key, ok, elem.Long, elem.Lat)
 	} else {
-		fmt.Printf("TestEntry  %v\n", ok)
+		fmt.Printf("%s:  %v\n", key, ok)
 	}
 }
