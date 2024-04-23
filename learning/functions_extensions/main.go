@@ -5,5 +5,8 @@ func main() {
 	//mainTypes()
 	// mainIpStringer()
 	// mainErrors()
-	mainSqrt()
+	// mainSqrt()
+	// mainReader()
+	// mainInfAReader()
+	mainRot13Reader()
 }
