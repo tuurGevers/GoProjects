@@ -1,22 +1,30 @@
 package repository
 
 import (
-	"context"
 	"fmt"
-	"todo-app/repository"
 
-	"github.com/jackc/pgx/v4"
-	"github.com/jackc/pgx/v4/pgxpool"
+	tasks "todo-app/models"
+
+	"gorm.io/gorm"
 )
 
-func DeleteTask(db *pgxpool.Pool, id int) error {
-	return repository.WithTransaction(db, func(tx pgx.Tx) error {
-		sql := `DELETE FROM tasks WHERE id = $1`
-		_, err := tx.Exec(context.Background(), sql, id)
-		if err != nil {
-			return err
-		}
-		fmt.Println("Deleted task with ID:", id)
-		return nil
-	})
+func DeleteTask(db *gorm.DB, id int) error {
+	// Find the task by ID
+	var task tasks.Task
+	result := db.First(&task, id)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return fmt.Errorf("task with ID %d not found", id)
+	}
+
+	// Delete the task
+	result = db.Delete(&task)
+	if result.Error != nil {
+		return result.Error
+	}
+	fmt.Println("Deleted task with ID:", id)
+
+	return nil
 }

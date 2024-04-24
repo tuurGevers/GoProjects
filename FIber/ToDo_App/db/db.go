@@ -1,24 +1,22 @@
 package db
 
 import (
-	"context"
-	"fmt"
-	"log"
 	"os"
 
-	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/joho/godotenv"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
-func ConnectDB() *pgxpool.Pool {
+func ConnectDB() (*gorm.DB, error) {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		return nil, err
 	}
-	conn, err := pgxpool.Connect(context.Background(), os.Getenv("DATABASE_URL"))
+	dsn := os.Getenv("DATABASE_URL")
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
-		os.Exit(1)
+		return nil, err
 	}
-	return conn
+	return db, nil
 }

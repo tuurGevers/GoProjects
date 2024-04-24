@@ -4,12 +4,12 @@ import (
 	repository "todo-app/repository/todo"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/jackc/pgx/v4/pgxpool"
+	"gorm.io/gorm"
 )
 
 func FetchAllTasks(ctx *fiber.Ctx) error {
 	tasks, err := repository.FetchAllTasks(
-		ctx.Locals("db").(*pgxpool.Pool),
+		ctx.Locals("db").(*gorm.DB),
 	)
 
 	if err != nil {

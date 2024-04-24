@@ -5,7 +5,7 @@ import (
 	repository "todo-app/repository/todo"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/jackc/pgx/v4/pgxpool"
+	"gorm.io/gorm"
 )
 
 func CreateTask(ctx *fiber.Ctx) error {
@@ -19,7 +19,7 @@ func CreateTask(ctx *fiber.Ctx) error {
 	println("Creating task:", task.ID, task.Description, task.Completed)
 
 	err := repository.InsertTask(
-		ctx.Locals("db").(*pgxpool.Pool),
+		ctx.Locals("db").(*gorm.DB),
 		task,
 	)
 	if err != nil {

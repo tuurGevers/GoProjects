@@ -6,7 +6,7 @@ import (
 	repository "todo-app/repository/todo"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/jackc/pgx/v4/pgxpool"
+	"gorm.io/gorm"
 )
 
 func DeleteTask(ctx *fiber.Ctx) error {
@@ -22,7 +22,7 @@ func DeleteTask(ctx *fiber.Ctx) error {
 	fmt.Println("Deleting task with ID:", param)
 
 	err = repository.DeleteTask(
-		ctx.Locals("db").(*pgxpool.Pool),
+		ctx.Locals("db").(*gorm.DB),
 		param,
 	)
 	if err != nil {
