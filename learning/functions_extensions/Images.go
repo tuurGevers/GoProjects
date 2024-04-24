@@ -7,7 +7,7 @@ import (
 	"golang.org/x/tour/pic"
 )
 
-// image with width and height
+// image with width and height implementing the image interface
 type Image struct {
 	width, height int
 }

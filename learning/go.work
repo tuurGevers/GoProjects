@@ -9,3 +9,5 @@ use ./GoMaps
 use ./function_values
 
 use ./functions_extensions
+
+use ./generics
