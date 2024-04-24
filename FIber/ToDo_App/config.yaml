@@ -1,0 +1,6 @@
+appConfig: weaver.toml
+repo: docker.io/tuurg
+
+listeners:
+  - name: todo
+    public: true

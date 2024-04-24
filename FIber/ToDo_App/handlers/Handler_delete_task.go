@@ -25,6 +25,7 @@ func DeleteTask(ctx *fiber.Ctx) error {
 		ctx.Locals("db").(*gorm.DB),
 		param,
 	)
+
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),

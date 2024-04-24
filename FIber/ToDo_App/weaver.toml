@@ -1,0 +1,3 @@
+[serviceweaver]
+binary = "./todo-app"
+args = ["-port", "8080"]
