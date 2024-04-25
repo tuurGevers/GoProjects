@@ -13,6 +13,7 @@ import (
 	"github.com/gofiber/adaptor/v2"
 
 	admin "admin-service/cmd"
+	db "shared/pkg/db"
 	user "user-service/cmd"
 )
 
@@ -67,11 +68,11 @@ func serve(ctx context.Context, a *App) error {
 
 func main() {
 	setupLogger()
-
+	db.FetchCollection()
 	// Handle graceful shutdown
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
-
+	log.Println("Starting services...")
 	if err := weaver.Run(ctx, serve); err != nil {
 		log.Fatalf("Failed to run service: %v", err)
 	}
