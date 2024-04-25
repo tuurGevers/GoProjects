@@ -23,7 +23,7 @@
   name = "user-service"
   exec = "./user-service" # The path to the compiled binary for the user service
   env = [
-    "DATABASE_URL=postgres://postgres:Root2004!@localhost:5432/todo-go" # Any environment variables needed by the user service
+    "DATABASE_URL=postgres://postgres:Root2004!@localhost:5432/todo-goq" # Any environment variables needed by the user service
   ]
   [services.health_checks]
     interval = "15s"
