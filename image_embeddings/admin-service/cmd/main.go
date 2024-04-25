@@ -1,20 +1,18 @@
 // admin-service/cmd/main.go
 
-package main
+package admin
 
 import (
-	"context"
-	"log"
-
 	db "admin-service/pkg/model"
+	"fmt"
 
-	weaverutil "shared/pkg" // Import the shared weaver utility
+	// Import the shared weaver utility
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
-func setupFiberApp() *fiber.App {
+func NewService() (*fiber.App, error) {
 	// Initialize Fiber app
 	fiberApp := fiber.New()
 
@@ -24,8 +22,7 @@ func setupFiberApp() *fiber.App {
 	// Connect to the database
 	dbConnection, err := db.ConnectDB()
 	if err != nil {
-		log.Println("Failed to connect to the database:", err)
-		return nil
+		return nil, fmt.Errorf("failed to connect to the database: %w", err)
 	}
 
 	// Middleware function to attach database connection to Fiber context
@@ -37,16 +34,6 @@ func setupFiberApp() *fiber.App {
 	// Setup routes
 	setupRoutes(fiberApp)
 
-	return fiberApp
-}
-
-func main() {
-	// Setup the Fiber app
-	fiberApp := setupFiberApp()
-	if fiberApp == nil {
-		log.Fatal("Failed to initialize Fiber app")
-	}
-
-	// Run the service with Service Weaver
-	weaverutil.RunService(context.Background(), fiberApp, false)
+	// Everything set up successfully
+	return fiberApp, nil
 }

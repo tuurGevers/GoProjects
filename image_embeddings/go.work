@@ -5,3 +5,5 @@ use ./admin-service
 use ./shared
 
 use ./user-service
+
+use .
