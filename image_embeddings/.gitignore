@@ -1,0 +1,63 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Dependency directories (remove the comment below to include it)
+# vendor/
+
+# Service-specific private files
+admin-service/private/*
+user-service/private/*
+
+# Logs and databases
+*.log
+*.sql
+*.sqlite
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Editor folders and files
+.idea
+.vscode
+*.swp
+*.swo
+
+# Ignore the serviceweaver.toml file to keep sensitive information out of source control
+serviceweaver.toml
+
+# Ignore local .env files that may contain secrets
+.env
+*.env.local
+
+# Ignore any other configuration files that may contain sensitive information
+*.yaml
+*.yml
+
+# Go specific
+bin/
+pkg/
+*.o
+*.a
+*.p
+*.z
+*.gz
+*.bz2
+*.xz
+
+# Go Modules
+go.sum
+go.mod
+# Uncomment the line below if you want to ignore the vendor directory.
+# /vendor/

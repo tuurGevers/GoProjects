@@ -1,0 +1,39 @@
+# weaver.toml
+
+# Define global options
+[global]
+  log_level = "info" # Other options include debug, warn, error
+
+# Define the admin service
+[[services]]
+  name = "admin-service"
+  exec = "./admin-service" # The path to the compiled binary for the admin service
+  env = [
+    "DATABASE_URL=postgres://postgres:Root2004!@localhost:5432/todo-go" # Any environment variables needed by the admin service
+  ]
+  [services.health_checks]
+    interval = "15s"
+    timeout = "3s"
+    [[services.health_checks.http]]
+      path = "/health"
+      port = 8081 # Port on which the admin service health check endpoint is exposed
+
+# Define the user service
+[[services]]
+  name = "user-service"
+  exec = "./user-service" # The path to the compiled binary for the user service
+  env = [
+    "DATABASE_URL=postgres://postgres:Root2004!@localhost:5432/todo-go" # Any environment variables needed by the user service
+  ]
+  [services.health_checks]
+    interval = "15s"
+    timeout = "3s"
+    [[services.health_checks.http]]
+      path = "/health"
+      port = 8082 # Port on which the user service health check endpoint is exposed
+
+# Set up network policies if needed (this is optional)
+[[network_policies]]
+  from_service = "admin-service"
+  to_service = "user-service"
+  allow = true # Allow admin service to talk to user service
