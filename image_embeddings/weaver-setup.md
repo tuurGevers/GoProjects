@@ -71,10 +71,60 @@ type App struct {
 
 func serve(ctx context.Context, a *App) error {
     // Service initialization and HTTP server setup for both user and admin services
+    var wg sync.WaitGroup
+
+	// Initialize User Service
+	userFiberApp, err := user.NewService()
+	if err != nil {
+		log.Printf("Failed to initialize User Service: %v", err)
+		return err
+	}
+	userHandler := adaptor.FiberApp(userFiberApp)
+	log.Printf("User Service available on %v\n", a.UserService)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if err := http.Serve(a.UserService, userHandler); err != nil {
+			log.Fatalf("Failed to start User Service: %v", err)
+		}
+	}()
+
+	// Initialize Admin Service
+	adminFiberApp, err := admin.NewService()
+	if err != nil {
+		log.Printf("Failed to initialize Admin Service: %v", err)
+		return err
+	}
+	adminHandler := adaptor.FiberApp(adminFiberApp)
+	log.Printf("Admin Service available on %v\n", a.AdminService)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if err := http.Serve(a.AdminService, adminHandler); err != nil {
+			log.Fatalf("Failed to start Admin Service: %v", err)
+		}
+	}()
+
+	// Wait for both servers to exit
+	wg.Wait()
+	return nil
 }
 
 func main() {
     // Weaver run command to manage the application lifecycle
+    setupLogger()
+
+	// Handle graceful shutdown
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	if err := weaver.Run(ctx, serve); err != nil {
+		log.Fatalf("Failed to run service: %v", err)
+	}
+
+	<-ctx.Done() // Block until context is done
+	stop()       // Stop the signal notifier
+	log.Println("Shutting down gracefully...")
 }
 ```
 
