@@ -35,7 +35,7 @@ Thumbs.db
 *.swo
 
 # Ignore the serviceweaver.toml file to keep sensitive information out of source control
-serviceweaver.toml
+weaver.toml
 
 # Ignore local .env files that may contain secrets
 .env
