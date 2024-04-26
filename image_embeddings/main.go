@@ -13,7 +13,6 @@ import (
 	"github.com/gofiber/adaptor/v2"
 
 	admin "admin-service/cmd"
-	db "shared/pkg/db"
 	user "user-service/cmd"
 )
 
@@ -68,7 +67,7 @@ func serve(ctx context.Context, a *App) error {
 
 func main() {
 	setupLogger()
-	db.FetchCollection()
+	// db.FetchCollection()
 	// Handle graceful shutdown
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
