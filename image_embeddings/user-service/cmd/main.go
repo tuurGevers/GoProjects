@@ -15,6 +15,7 @@ import (
 	db "user-service/pkg/model"
 )
 
+// NewService creates a new Fiber app and sets up the user-service routes
 func NewService() (*fiber.App, error) {
 	// Initialize Fiber app
 	fiberApp := fiber.New()
