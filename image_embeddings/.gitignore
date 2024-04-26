@@ -47,7 +47,6 @@ weaver.toml
 
 # Go specific
 bin/
-pkg/
 *.o
 *.a
 *.p
