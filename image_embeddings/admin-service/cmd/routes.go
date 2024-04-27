@@ -8,4 +8,5 @@ import (
 
 func setupRoutes(app *fiber.App) {
 	app.Post("/insert", handlers.InsertEmbedding)
+	app.Post("/insert-image", handlers.InsertBasicEmbedding)
 }
