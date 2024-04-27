@@ -3,6 +3,7 @@ package handlers
 import (
 	"admin-service/pkg/service"
 	"io"
+	"log"
 	"shared/pkg/db"
 	"shared/pkg/models"
 
@@ -28,7 +29,8 @@ func InsertEmbedding(ctx *fiber.Ctx) error {
 		})
 	}
 
-	res, err := db.InsertData(vectors)
+	log.Printf("VectorsLength: %v url:%s", len(vectors), description.Url)
+	res, err := db.InsertData(vectors, description.Url)
 	if err != nil {
 		ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to insert data",
