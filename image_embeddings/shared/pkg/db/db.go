@@ -1,151 +1,105 @@
 package db
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
-	"strings"
 )
 
+// FetchCollection retrieves the specified collection items.
 func FetchCollection() (*http.Response, error) {
-	url := fmt.Sprintf("%s/v1/vector/get", os.Getenv("COLLECTION_URL"))
-
-	fmt.Println(url)
-
-	payload := strings.NewReader("{\"collectionName\":\"image_testsv4\",\"id\":[1,2,3]}")
-
-	req, err := http.NewRequest("POST", url, payload)
-	if err != nil {
-		return nil, fmt.Errorf("creating request failed: %v", err)
+	params := DBRequestParams{
+		CollectionName: "image_testsv4",
+		// Assuming "id" should be an array of integers you're interested in fetching.
+		// If "id" should be something else, adjust the type accordingly.
+		Data: map[string][]int{"id": {1, 2, 3}},
 	}
-
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", os.Getenv("COLLECTION_TOKEN")))
-
-	req.Header.Add("Accept", "application/json")
-	req.Header.Add("Content-Type", "application/json")
-
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("sending request failed: %v", err)
-	}
-
-	return res, nil
+	return makeDBRequest("/v1/vector/get", params)
 }
 
+// SearchData searches the collection using a vector.
 func SearchData(vectors []float64) (*http.Response, error) {
-	url := fmt.Sprintf("%s/v1/vector/search", os.Getenv("COLLECTION_URL"))
-	payloadString := fmt.Sprintf("{\"collectionName\":\"%s\",\"vector\":[%v]}", os.Getenv("COLLECTION_NAME"), strings.Trim(strings.Join(strings.Fields(fmt.Sprint(vectors)), ","), "[]"))
-	payload := strings.NewReader(payloadString)
-
-	req, err := http.NewRequest("POST", url, payload)
-	if err != nil {
-		log.Printf("Error creating request: %v", err)
-		return nil, fmt.Errorf("failed to create request: %v", err)
+	params := DBRequestParams{
+		CollectionName: os.Getenv("COLLECTION_NAME"),
+		Vector:         vectors,
 	}
-
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", os.Getenv("COLLECTION_TOKEN")))
-	req.Header.Add("Accept", "application/json")
-	req.Header.Add("Content-Type", "application/json")
-
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		log.Printf("Error sending request: %v", err)
-		return nil, fmt.Errorf("failed to send request: %v", err)
-	}
-
-	// Optional: Check for HTTP error responses (e.g., status codes 4xx or 5xx)
-	if res.StatusCode >= 400 {
-		body, err := io.ReadAll(res.Body)
-		if err != nil {
-			res.Body.Close() // Ensure resource release if reading body fails
-			log.Printf("Error reading response body: %v", err)
-			return res, fmt.Errorf("failed to read response body: %v", err)
-		}
-		res.Body.Close() // Close the response body after reading
-		log.Printf("Error response from server: %s", body)
-		return res, fmt.Errorf("server returned error status: %s, body: %s", res.Status, body)
-	}
-
-	return res, nil
+	return makeDBRequest("/v1/vector/search", params)
 }
 
 // InsertData sends a request to insert vector data into a collection.
 func InsertData(vectors []float64, imageUrl string) (*http.Response, error) {
-	url := fmt.Sprintf("%s/v1/vector/insert", os.Getenv("COLLECTION_URL"))
-	log.Printf("Inserting data at URL: %s", url)
-
-	// Create payload from vectors
-	payloadString := fmt.Sprintf("{\"collectionName\":\"%s\",\"data\":[{\"vector\":[%v], \"url\":\"%s\"}]}", os.Getenv("COLLECTION_NAME"), strings.Trim(strings.Join(strings.Fields(fmt.Sprint(vectors)), ","), "[]"), imageUrl)
-	payload := strings.NewReader(payloadString)
-	log.Printf("Payload: %s", payloadString)
-
-	// Create the request
-	req, err := http.NewRequest("POST", url, payload)
-	if err != nil {
-		log.Printf("Error creating request: %v", err)
-		return nil, fmt.Errorf("failed to create request: %v", err)
+	params := DBRequestParams{
+		CollectionName: os.Getenv("COLLECTION_NAME"),
+		Data: []map[string]interface{}{
+			{
+				"vector": vectors,
+				"url":    imageUrl,
+			},
+		},
 	}
-
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", os.Getenv("COLLECTION_TOKEN")))
-	req.Header.Add("Accept", "application/json")
-	req.Header.Add("Content-Type", "application/json")
-
-	// Send the request
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		log.Printf("Error sending request: %v", err)
-		return nil, fmt.Errorf("failed to send request: %v", err)
-	}
-	defer res.Body.Close()
-
-	// Read the response
-	respBody, err := io.ReadAll(res.Body)
-	if err != nil {
-		log.Printf("Error reading response body: %v", err)
-		return res, fmt.Errorf("failed to read response body: %v", err)
-	}
-	log.Printf("Response status: %s, Body: %s", res.Status, string(respBody))
-
-	if res.StatusCode >= 400 {
-		return res, fmt.Errorf("server returned error status: %s, body: %s", res.Status, string(respBody))
-	}
-
-	return res, nil
+	return makeDBRequest("/v1/vector/insert", params)
 }
 
-// query data by id
+// QueryData queries data by Auto_id.
 func QueryData(id int) (*http.Response, error) {
-	url := fmt.Sprintf("%s/v1/vector/query", os.Getenv("COLLECTION_URL"))
-	payloadString := fmt.Sprintf("{\"collectionName\":\"%s\",\"filter\":\"Auto_id in [%d]\"}", os.Getenv("COLLECTION_NAME"), id) // Fix here
-	payload := strings.NewReader(payloadString)
+	params := DBRequestParams{
+		CollectionName: os.Getenv("COLLECTION_NAME"),
+		Filter:         fmt.Sprintf("Auto_id in [%d]", id),
+	}
+	return makeDBRequest("/v1/vector/query", params)
+}
 
+// DBRequestParams struct for passing parameters to the helper function.
+type DBRequestParams struct {
+	CollectionName string      `json:"collectionName"`
+	Filter         interface{} `json:"filter,omitempty"`
+	Vector         interface{} `json:"vector,omitempty"`
+	Data           interface{} `json:"data,omitempty"`
+}
+
+// Helper function for making a request to the database.
+func makeDBRequest(endpoint string, params DBRequestParams) (*http.Response, error) {
+	url := fmt.Sprintf("%s%s", os.Getenv("COLLECTION_URL"), endpoint)
+
+	// Marshal the params into a JSON payload.
+	payloadBytes, err := json.Marshal(params)
+	if err != nil {
+		log.Printf("Error marshalling params: %v", err)
+		return nil, fmt.Errorf("failed to marshal params: %v", err)
+	}
+	payload := bytes.NewReader(payloadBytes)
+
+	// Create the request.
 	req, err := http.NewRequest("POST", url, payload)
 	if err != nil {
 		log.Printf("Error creating request: %v", err)
 		return nil, fmt.Errorf("failed to create request: %v", err)
 	}
 
+	// Add necessary headers.
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", os.Getenv("COLLECTION_TOKEN")))
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("Content-Type", "application/json")
 
+	// Send the request.
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		log.Printf("Error sending request: %v", err)
 		return nil, fmt.Errorf("failed to send request: %v", err)
 	}
 
-	// Optional: Check for HTTP error responses (e.g., status codes 4xx or 5xx)
+	// Handle non-200 status codes.
 	if res.StatusCode >= 400 {
 		body, err := io.ReadAll(res.Body)
+		defer res.Body.Close() // Close the body regardless of ReadAll's success.
 		if err != nil {
-			res.Body.Close() // Ensure resource release if reading body fails
 			log.Printf("Error reading response body: %v", err)
 			return res, fmt.Errorf("failed to read response body: %v", err)
 		}
-		res.Body.Close() // Close the response body after reading
 		log.Printf("Error response from server: %s", body)
 		return res, fmt.Errorf("server returned error status: %s, body: %s", res.Status, body)
 	}
