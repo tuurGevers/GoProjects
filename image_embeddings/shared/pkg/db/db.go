@@ -8,22 +8,12 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"shared/pkg/models"
 )
-
-// FetchCollection retrieves the specified collection items.
-func FetchCollection() (*http.Response, error) {
-	params := DBRequestParams{
-		CollectionName: "image_testsv4",
-		// Assuming "id" should be an array of integers you're interested in fetching.
-		// If "id" should be something else, adjust the type accordingly.
-		Data: map[string][]int{"id": {1, 2, 3}},
-	}
-	return makeDBRequest("/v1/vector/get", params)
-}
 
 // SearchData searches the collection using a vector.
 func SearchData(vectors []float64) (*http.Response, error) {
-	params := DBRequestParams{
+	params := models.DBRequestParams{
 		CollectionName: os.Getenv("COLLECTION_NAME"),
 		Vector:         vectors,
 	}
@@ -32,7 +22,7 @@ func SearchData(vectors []float64) (*http.Response, error) {
 
 // InsertData sends a request to insert vector data into a collection.
 func InsertData(vectors []float64, imageUrl string) (*http.Response, error) {
-	params := DBRequestParams{
+	params := models.DBRequestParams{
 		CollectionName: os.Getenv("COLLECTION_NAME"),
 		Data: []map[string]interface{}{
 			{
@@ -46,23 +36,15 @@ func InsertData(vectors []float64, imageUrl string) (*http.Response, error) {
 
 // QueryData queries data by Auto_id.
 func QueryData(id int) (*http.Response, error) {
-	params := DBRequestParams{
+	params := models.DBRequestParams{
 		CollectionName: os.Getenv("COLLECTION_NAME"),
 		Filter:         fmt.Sprintf("Auto_id in [%d]", id),
 	}
 	return makeDBRequest("/v1/vector/query", params)
 }
 
-// DBRequestParams struct for passing parameters to the helper function.
-type DBRequestParams struct {
-	CollectionName string      `json:"collectionName"`
-	Filter         interface{} `json:"filter,omitempty"`
-	Vector         interface{} `json:"vector,omitempty"`
-	Data           interface{} `json:"data,omitempty"`
-}
-
 // Helper function for making a request to the database.
-func makeDBRequest(endpoint string, params DBRequestParams) (*http.Response, error) {
+func makeDBRequest(endpoint string, params models.DBRequestParams) (*http.Response, error) {
 	url := fmt.Sprintf("%s%s", os.Getenv("COLLECTION_URL"), endpoint)
 
 	// Marshal the params into a JSON payload.

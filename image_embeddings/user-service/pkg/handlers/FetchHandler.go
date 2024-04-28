@@ -3,38 +3,16 @@ package handlers
 import (
 	"admin-service/pkg/service"
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"shared/pkg/db"
 	sharedModels "shared/pkg/models"
 	"shared/pkg/util"
+	cloudinaryservice "shared/pkg/util/cloudinary"
 	models "user-service/pkg/model"
 
 	"github.com/gofiber/fiber/v2"
 )
-
-func FetchAllVectors(ctx *fiber.Ctx) error {
-	fc := util.FiberContext{Ctx: ctx}
-
-	fmt.Println("Fetching all vectors")
-	// res := db.FetchTest()
-	fmt.Println("result found")
-
-	res, err := db.FetchCollection()
-
-	if err != nil {
-		return fc.HandleError(fiber.StatusInternalServerError, "Failed to fetch data")
-	}
-	fmt.Println("result found")
-
-	defer res.Body.Close()
-
-	body, _ := io.ReadAll(res.Body)
-
-	ctx.SendString(string(body))
-	return nil
-}
 
 func Search(ctx *fiber.Ctx) error {
 	fc := util.FiberContext{Ctx: ctx}
@@ -119,4 +97,16 @@ func SearchEmbedding(ctx *fiber.Ctx) error {
 
 	// Send the final response body as the context response
 	return ctx.SendString(string(finalBody))
+}
+
+// fetxhFOlder handler
+func FetchFolder(ctx *fiber.Ctx) error {
+	folders, err := cloudinaryservice.FetchFolder()
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Failed to fetch folders",
+		})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(folders)
 }

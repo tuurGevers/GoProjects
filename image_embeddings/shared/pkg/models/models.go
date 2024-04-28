@@ -29,3 +29,11 @@ type SearItemItem struct {
 	AutoID   int64   `json:"Auto_id"`
 	Distance float64 `json:"distance"`
 }
+
+// DBRequestParams struct for passing parameters to the helper function.
+type DBRequestParams struct {
+	CollectionName string      `json:"collectionName"`
+	Filter         interface{} `json:"filter,omitempty"`
+	Vector         interface{} `json:"vector,omitempty"`
+	Data           interface{} `json:"data,omitempty"`
+}

@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"admin-service/pkg/service"
-	"io"
 	"log"
 	"os"
 	"shared/pkg/db"
@@ -40,9 +39,7 @@ func InsertEmbedding(ctx *fiber.Ctx) error {
 	}
 	defer res.Body.Close()
 
-	body, _ := io.ReadAll(res.Body)
-
-	ctx.SendString(string(body))
+	ctx.SendStatus(fiber.StatusOK)
 	return nil
 }
 
