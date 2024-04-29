@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"shared/pkg/models"
+	"strings"
 )
 
 // SearchData searches the collection using a vector.
@@ -43,6 +44,61 @@ func QueryData(id int) (*http.Response, error) {
 	return makeDBRequest("/v1/vector/query", params)
 }
 
+// DeleteData deletes data by Auto_id.
+func DeleteData(id int) (*http.Response, error) {
+	params := models.DBRequestParams{
+		CollectionName: os.Getenv("COLLECTION_NAME"),
+		Id:             []int{id},
+	}
+	return makeDBRequest("/v1/vector/delete", params)
+}
+
+// DeleteMultiple deletes data by Auto_id.
+func DeleteMultiple(ids []int) (*http.Response, error) {
+	params := models.DBRequestParams{
+		CollectionName: os.Getenv("COLLECTION_NAME"),
+		Id:             ids,
+	}
+	return makeDBRequest("/v1/vector/delete", params)
+}
+
+// DeleteMultipleByUrl deletes data by URL.
+func DeleteMultipleByUrl(urls []string) (*http.Response, error) {
+	urlsJson := `["` + strings.Join(urls, `", "`) + `"]`
+	params := models.DBRequestParams{
+		CollectionName: os.Getenv("COLLECTION_NAME"),
+		Filter:         "url in " + urlsJson,
+	}
+	res, err := makeDBRequest("/v1/vector/query", params)
+	if err != nil {
+		return nil, err
+	}
+
+	//fetch auto_id from response
+	var data models.EmbeddingResponse
+	err = json.NewDecoder(res.Body).Decode(&data)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Println("Data: ", data)
+
+	itemIds := make([]int, 0)
+	//delete data by auto_id
+	for _, item := range data.Data {
+		itemIds = append(itemIds, int(item.AutoID))
+
+	}
+
+	res, err = DeleteMultiple(itemIds)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+
+}
+
 // Helper function for making a request to the database.
 func makeDBRequest(endpoint string, params models.DBRequestParams) (*http.Response, error) {
 	url := fmt.Sprintf("%s%s", os.Getenv("COLLECTION_URL"), endpoint)
@@ -54,6 +110,8 @@ func makeDBRequest(endpoint string, params models.DBRequestParams) (*http.Respon
 		return nil, fmt.Errorf("failed to marshal params: %v", err)
 	}
 	payload := bytes.NewReader(payloadBytes)
+
+	log.Printf("Sending request to %s with payload: %s", url, payloadBytes)
 
 	// Create the request.
 	req, err := http.NewRequest("POST", url, payload)

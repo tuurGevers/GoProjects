@@ -36,4 +36,5 @@ type DBRequestParams struct {
 	Filter         interface{} `json:"filter,omitempty"`
 	Vector         interface{} `json:"vector,omitempty"`
 	Data           interface{} `json:"data,omitempty"`
+	Id             interface{} `json:"id,omitempty"`
 }

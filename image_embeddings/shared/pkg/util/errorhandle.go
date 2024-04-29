@@ -2,6 +2,8 @@ package util
 
 import (
 	"log"
+	"math"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -15,4 +17,9 @@ type FiberContext struct {
 func (fc FiberContext) HandleError(statusCode int, message string) error {
 	log.Printf("Error %d: %s", statusCode, message) // Optional: Add logging here.
 	return fc.Ctx.Status(statusCode).JSON(fiber.Map{"error": message})
+}
+
+// exponentialBackoff is a utility function that waits for an exponential amount of time.
+func ExponentialBackoff(retry int) {
+	time.Sleep(time.Duration(math.Pow(2, float64(retry))) * 100 * time.Millisecond) // Exponential backoff
 }

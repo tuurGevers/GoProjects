@@ -3,7 +3,7 @@
 package admin
 
 import (
-	db "admin-service/pkg/model"
+	db "admin-service/pkg/model/db"
 	"fmt"
 
 	// Import the shared weaver utility

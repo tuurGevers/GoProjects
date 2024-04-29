@@ -8,6 +8,10 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"shared/pkg/db"
+	"shared/pkg/util"
+	"shared/pkg/util/gpt"
+	"shared/pkg/util/gpt/serial"
 )
 
 // Embed generates text embeddings using OpenAI's API.
@@ -23,8 +27,6 @@ func Embed(s string) ([]float64, error) {
 		log.Printf("Error marshaling payload: %v", err)
 		return nil, fmt.Errorf("failed to marshal payload: %v", err)
 	}
-
-	log.Println("Request body: ", string(body))
 
 	req, err := http.NewRequest("POST", "https://api.openai.com/v1/embeddings", bytes.NewBuffer(body))
 	if err != nil {
@@ -49,8 +51,6 @@ func Embed(s string) ([]float64, error) {
 		return nil, fmt.Errorf("failed to read response body: %v", err)
 	}
 
-	log.Println("Response body: ", string(respBody))
-
 	var result struct {
 		Data []struct {
 			Embedding []float64 `json:"embedding"`
@@ -67,7 +67,6 @@ func Embed(s string) ([]float64, error) {
 		return nil, fmt.Errorf("no embeddings returned, response body: %s", string(respBody))
 	}
 
-	log.Println("Embedding data found: ", result.Data[0].Embedding)
 	return result.Data[0].Embedding, nil
 }
 
@@ -75,4 +74,47 @@ func Embed(s string) ([]float64, error) {
 type EmbedRequest struct {
 	Input string `json:"input"`
 	Model string `json:"model"`
+}
+
+func InsertBasicEmbeddingURL(url string) error {
+	// Call GptVisionRequest function to generate a description with low detail
+	request := gpt.GptVisionRequest(url, false)
+	apiKey := os.Getenv("OPENAI_API_KEY")
+	endpoint := "https://api.openai.com/v1/chat/completions"
+
+	var response *serial.GPTResponse // Ensure that ResponseType can handle the response structure
+	retry := 0
+	maxRetries := 5
+	var err error
+
+	for {
+		response, err = gpt.MakeGPTRequest("gpt-4-turbo", apiKey, endpoint, request)
+		if err == nil {
+			break // Exit loop if request is successful
+		}
+		if retry >= maxRetries {
+			return fmt.Errorf("max retries reached: %v", err) // Return after max retries
+		}
+		retry++
+		util.ExponentialBackoff(retry) // Wait before next retry
+		log.Printf("Retrying after error: %v", err)
+	}
+
+	// Check for non-empty response
+	if len(response.Choices) == 0 || response.Choices[0].Message.Content == "" {
+		return fmt.Errorf("no content received from GPT response")
+	}
+
+	// Use the description to generate vectors
+	vectors, err := Embed(response.Choices[0].Message.Content)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.InsertData(vectors, url)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

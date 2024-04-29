@@ -77,7 +77,6 @@ func MakeGPTRequest(model, apiKey, endpoint string, request serial.GPTRequest) (
 	}
 
 	// Log the raw response body for debugging purposes
-	log.Printf("Raw GPT Response Body: %s", string(body))
 
 	// Unmarshal the JSON data into the GPTResponse struct
 	var gptResponse serial.GPTResponse
@@ -85,6 +84,8 @@ func MakeGPTRequest(model, apiKey, endpoint string, request serial.GPTRequest) (
 	if err != nil {
 		return nil, fmt.Errorf("error unmarshalling response: %v", err)
 	}
+
+	// log.Printf("Response: %v", gptResponse.Choices[0].Message.Content)
 
 	return &gptResponse, nil
 }

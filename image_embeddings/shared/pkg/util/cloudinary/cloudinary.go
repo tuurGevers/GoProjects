@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 )
 
 // BriefAssetResult represents the expected format of each asset in the response.
@@ -15,13 +16,14 @@ type BriefAssetResult struct {
 
 // FetchFolder makes a direct HTTP request to Cloudinary to fetch asset folder contents.
 func FetchFolder() ([]BriefAssetResult, error) {
-	apiKey := "124968459838979"
-	apiSecret := "duvK7Furek2J3X6lmDQ-Ru-2ST4"
-	cloudName := "dtdexjpxv"
+	apiKey := os.Getenv("CLOUDINARY_API_KEY")
+	apiSecret := os.Getenv("CLOUDINARY_API_SECRET")
+	cloudName := os.Getenv("CLOUD_NAME")
 	folder := "fotos_Streetphotography"
+	maxResults := 100 // Set the desired number of results per request
 
 	// Set up the request URL and authentication
-	url := fmt.Sprintf("https://api.cloudinary.com/v1_1/%s/resources/image/upload?prefix=%s", cloudName, folder)
+	url := fmt.Sprintf("https://api.cloudinary.com/v1_1/%s/resources/image/upload?prefix=%s&max_results=%d", cloudName, folder, maxResults)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		log.Printf("error creating request: %v", err)

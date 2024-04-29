@@ -108,5 +108,13 @@ func FetchFolder(ctx *fiber.Ctx) error {
 		})
 	}
 
+	for i, folder := range folders {
+		if i > 5 {
+			break
+		}
+		log.Printf("Folder %d: %s", i, folder.SecureURL)
+
+	}
+
 	return ctx.Status(fiber.StatusOK).JSON(folders)
 }
