@@ -66,6 +66,7 @@ func serve(ctx context.Context, a *App) error {
 }
 
 func main() {
+
 	setupLogger()
 	// db.FetchCollection()
 	// Handle graceful shutdown

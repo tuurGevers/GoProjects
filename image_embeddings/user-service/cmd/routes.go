@@ -8,7 +8,7 @@ import (
 
 func setupUserRoutes(app *fiber.App) {
 	app.Get("/search", handlers.Search)
-	app.Get("/searchstring", handlers.SearchEmbedding)
+	app.Post("/searchstring", handlers.SearchEmbedding)
 	app.Get("/test", func(c *fiber.Ctx) error {
 		return c.SendString("Hello, World!")
 	})

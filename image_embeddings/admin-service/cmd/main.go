@@ -9,13 +9,18 @@ import (
 	// Import the shared weaver utility
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
 func NewService() (*fiber.App, error) {
 	// Initialize Fiber app
 	fiberApp := fiber.New()
-
+	fiberApp.Use(cors.New(cors.Config{
+		AllowOrigins: "*",                              // Allow any origin
+		AllowMethods: "GET,POST,HEAD,PUT,DELETE,PATCH", // Specify what methods to allow
+		AllowHeaders: "Origin, Content-Type, Accept",   // Specify what headers to allow
+	}))
 	// Add middleware for logging
 	fiberApp.Use(logger.New())
 
